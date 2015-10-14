@@ -36,18 +36,20 @@ def getData():
 
 	# TRY TO SEND BACK OTHER MESSAGES FROM THE SERVER. 
 	# MAKE SURE THE MESSAGES ARE BEING DISPLAYED ON THE FRONT END.
-	q.put("starting data query...")
+	q.put("Starting the data query...")
 
 	lat1 = str(request.args.get('lat1'))
 	lng1 = str(request.args.get('lng1'))
 	lat2 = str(request.args.get('lat2'))
 	lng2 = str(request.args.get('lng2'))
-
+	
+        q.put("Recieved required information...")
+        
 	print "received coordinates: [" + lat1 + ", " + lat2 + "], [" + lng1 + ", " + lng2 + "]"
 	
 	client = pyorient.OrientDB("localhost", 2424)
-	session_id = client.connect("root", "password")
-	db_name = "property_test"
+	session_id = client.connect("root", "http://localhost:2480/")
+	db_name = "soufun"
 	db_username = "admin"
 	db_password = "admin"
 
@@ -69,9 +71,10 @@ def getData():
 	print 'received ' + str(numListings) + ' records'
 
 	client.db_close()
+	
+	q.put("Creating output..")
 
 	output = {"type":"FeatureCollection","features":[]}
-
 	for record in records:
 		feature = {"type":"Feature","properties":{},"geometry":{"type":"Point"}}
 		feature["id"] = record._rid
@@ -81,7 +84,7 @@ def getData():
 
 		output["features"].append(feature)
 
-	q.put('idle')
+	q.put('I am idle')
 
 	return json.dumps(output)
 
