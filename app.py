@@ -1,9 +1,11 @@
 from flask import Flask
 from flask import render_template
+from flask import request
 
 import json
 import time
 import sys
+import random
 
 import pyorient
 
@@ -15,6 +17,13 @@ def index():
 
 @app.route("/getData/")
 def getData():
+
+	lat1 = str(request.args.get('lat1'))
+	lng1 = str(request.args.get('lng1'))
+	lat2 = str(request.args.get('lat2'))
+	lng2 = str(request.args.get('lng2'))
+
+	print "received coordinates: [" + lat1 + ", " + lat2 + "], [" + lng1 + ", " + lng2 + "]"
 	
 	client = pyorient.OrientDB("localhost", 2424)
 	session_id = client.connect("root", "password")
@@ -28,16 +37,13 @@ def getData():
 	else:
 		print "database [" + db_name + "] does not exist! session ending..."
 		sys.exit()
-		
-	lat1 = 22.532498
-	lat2 = 22.552317
-
-	lng1 = 114.044329
-	lng2 = 114.076644
 
 	query = 'SELECT FROM Listing WHERE latitude BETWEEN {} AND {} AND longitude BETWEEN {} AND {}'
 
 	records = client.command(query.format(lat1, lat2, lng1, lng2))
+
+	random.shuffle(records)
+	records = records[:100]
 
 	numListings = len(records)
 	print 'received ' + str(numListings) + ' records'
